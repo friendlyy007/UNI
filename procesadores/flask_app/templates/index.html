@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gráfico en Tiempo Real</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <h1>Gráfico de Electrocardiograma</h1>
+    <div>
+        <label for="cantidad">Cantidad de valores a mostrar:</label>
+        <input type="number" id="cantidad" value="200" min="1" max="200">
+        <button onclick="actualizarGrafico()">Actualizar Gráfico</button> <!-- Botón de actualización -->
+    </div>
+    <div id="grafico" style="width:100%;height:400px;"></div>
+    <script>
+        let cantidadActual = 200; // Variable para almacenar la cantidad de datos actuales
+
+        function obtenerDatos(cantidad) {
+            fetch(`/datos`)
+                .then(response => response.json())
+                .then(data => {
+                    const trace = {
+                        x: data.tiempos.slice(-cantidad), // Obtener los últimos 'cantidad' tiempos
+                        y: data.valores.slice(-cantidad), // Obtener los últimos 'cantidad' valores
+                        mode: 'lines+markers',
+                        type: 'scatter'
+                    };
+                    
+                    const layout = {
+                        title: 'Valor del sensor',
+                        xaxis: { title: 'Tiempo (s)' },
+                        yaxis: { title: 'Valor' }
+                    };
+
+                    Plotly.newPlot('grafico', [trace], layout);
+                })
+                .catch(error => {
+                    console.error('Error al obtener datos:', error);
+                });
+        }
+
+        function actualizarGrafico() {
+            let cantidad = parseInt(document.getElementById('cantidad').value);
+            
+            // Validar que la cantidad sea un número entre 1 y 200
+            if (isNaN(cantidad) || cantidad < 1 || cantidad > 200) {
+                alert("Por favor, introduce un número válido entre 1 y 200.");
+                return;
+            }
+            
+            console.log(`Actualizando gráfico con ${cantidad} datos`); // Para depuración
+            cantidadActual = cantidad; // Actualiza la cantidad actual
+            obtenerDatos(cantidad); // Obtiene los datos para la cantidad especificada
+        }
+
+        // Función para actualizar los datos automáticamente
+        setInterval(() => obtenerDatos(cantidadActual), 1000); // Actualiza cada segundo
+
+        // Cargar los datos inicialmente con la cantidad predeterminada
+        actualizarGrafico();
+    </script>
+</body>
+</html>

@@ -1,0 +1,64 @@
+from flask import Flask, render_template, jsonify
+import random
+import time
+import threading
+
+app = Flask(__name__)
+
+# Variable para almacenar los valores y tiempos
+valores = []
+tiempos = []
+
+# Tiempo de inicio
+inicio = time.time()
+
+# Función para generar valores aleatorios
+def generar_valores():
+    while True:
+        # Generar un valor aleatorio entre 0 y 5
+        valor = random.randint(0, 5)
+        # Obtener el tiempo transcurrido desde el inicio
+        tiempo_actual = time.time() - inicio
+        
+        # Agregar valor y tiempo a las listas
+        valores.append(valor)
+        tiempos.append(tiempo_actual)
+        
+        # Limitar la lista a los últimos 60 valores
+        if len(valores) > 60:
+            valores.pop(0)
+            tiempos.pop(0)
+        
+        # Esperar 1 segundo
+        time.sleep(1)
+
+# Iniciar el hilo de generación de valores
+threading.Thread(target=generar_valores, daemon=True).start()
+
+@app.route('/')
+def home():
+    return render_template('index.html')
+
+@app.route('/datos')
+def datos():
+    # Devolver los valores y tiempos en formato JSON
+    return jsonify(valores=valores, tiempos=tiempos)
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000, debug=True)
+
+@app.route('/datos')
+def datos():
+    cantidad = int(request.args.get('cantidad', 60))  # Obtén la cantidad de datos
+    # Limitar la longitud de los valores y tiempos a la cantidad solicitada
+    return jsonify(valores=valores[-cantidad:], tiempos=tiempos[-cantidad:])
+@app.route('/datos')
+def datos():
+    cantidad = int(request.args.get('cantidad', 60))  # Obtén la cantidad de datos
+    # Limitar la longitud de los valores y tiempos a la cantidad solicitada
+    return jsonify(valores=valores[-cantidad:], tiempos=tiempos[-cantidad:])
+@app.route('/datos')
+def datos():
+    cantidad = int(request.args.get('cantidad', 60))  # Obtén la cantidad de datos
+    # Limitar la longitud de los valores y tiempos a la cantidad solicitada
+    return jsonify(valores=valores[-cantidad:], tiempos=tiempos[-cantidad:])
